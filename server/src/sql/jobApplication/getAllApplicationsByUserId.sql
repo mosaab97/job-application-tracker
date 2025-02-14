@@ -1,0 +1,1 @@
+select * from job_applications where user_id = $1

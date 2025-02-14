@@ -1,0 +1,14 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.MuiTable-root {
+  overflow-x: auto;
+}
+
+@media (max-width: 600px) {
+  .MuiTableCell-root {
+    padding: 8px;
+  }
+}

@@ -1,0 +1,181 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "User Authentication API",
+    "version": "1.0.0",
+    "description": "API documentation for sign-up, login, and user update features"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/users/signup": {
+      "post": {
+        "summary": "Sign up a new user",
+        "description": "Create a new user with a name, email, and password.",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "email",
+                  "password"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully"
+          },
+          "400": {
+            "description": "Email already in use"
+          }
+        }
+      }
+    },
+    "/users/login": {
+      "post": {
+        "summary": "Log in a user",
+        "description": "Authenticate a user and return a JWT token.",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "password"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "default": "admin@gmail.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "default": "admin"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful"
+          },
+          "401": {
+            "description": "Invalid email or password"
+          }
+        }
+      }
+    },
+    "/users/update": {
+      "put": {
+        "summary": "Update user details",
+        "description": "Update a user’s name and email. Requires authentication.",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "email"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "default": "admin"
+                  },
+                  "email": {
+                    "type": "string",
+                    "default": "admin@gmail.com"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully"
+          },
+          "401": {
+            "description": "Unauthorized (no token provided)"
+          },
+          "403": {
+            "description": "Invalid or expired token"
+          }
+        }
+      }
+    },
+
+    "/jobs/all/:id": {
+      "post": {
+        "summary": "get all job applications for the user",
+        "description": "get a list of job applications for the current user",
+        "tags": [
+          "Jobs"
+        ],
+        "requestBody": {},
+        "responses": {
+          "200": {
+            "description": "list of job applications"
+          },
+          "400": {
+            "description": "user id wrong"
+          }
+        }
+      }
+    }
+  }
+}
