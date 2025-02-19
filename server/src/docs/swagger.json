@@ -1,13 +1,13 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "User Authentication API",
+    "title": "Job Application Tracker API",
     "version": "1.0.0",
-    "description": "API documentation for sign-up, login, and user update features"
+    "description": "API documentation for job application tracking system"
   },
   "servers": [
     {
-      "url": "http://localhost:3000/api"
+      "url": "http://localhost:5000/api"
     }
   ],
   "components": {
@@ -16,6 +16,65 @@
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "JobApplication": {
+        "type": "object",
+        "properties": {
+          "company_name": {
+            "type": "string",
+            "example": "Tech Corp"
+          },
+          "job_title": {
+            "type": "string",
+            "example": "Senior Developer"
+          },
+          "job_location": {
+            "type": "string",
+            "example": "New York, NY"
+          },
+          "application_status": {
+            "type": "string",
+            "enum": ["Applied", "Interviewing", "Offered", "Rejected"],
+            "example": "Applied"
+          },
+          "applied_date": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-02-15T00:00:00Z"
+          },
+          "interview_date": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-03-01T00:00:00Z"
+          },
+          "job_link": {
+            "type": "string",
+            "example": "https://example.com/job/123"
+          },
+          "notes": {
+            "type": "string",
+            "example": "Follow up after 2 weeks"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "msg": {
+            "type": "string",
+            "example": "Error message"
+          }
+        }
+      }
+    },
+    "responses": {
+      "UnauthorizedError": {
+        "description": "Authentication token is missing or invalid",
+        "content": {
+          "application/json": { "$ref": "#/components/schemas/Error" }
+        }
       }
     }
   },
@@ -29,42 +88,26 @@
       "post": {
         "summary": "Sign up a new user",
         "description": "Create a new user with a name, email, and password.",
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "name",
-                  "email",
-                  "password"
-                ],
+                "required": ["name", "email", "password"],
                 "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "email": {
-                    "type": "string"
-                  },
-                  "password": {
-                    "type": "string"
-                  }
+                  "name": { "type": "string" },
+                  "email": { "type": "string" },
+                  "password": { "type": "string" }
                 }
               }
             }
           }
         },
         "responses": {
-          "201": {
-            "description": "User created successfully"
-          },
-          "400": {
-            "description": "Email already in use"
-          }
+          "201": { "description": "User created successfully" },
+          "400": { "description": "Email already in use" }
         }
       }
     },
@@ -72,40 +115,25 @@
       "post": {
         "summary": "Log in a user",
         "description": "Authenticate a user and return a JWT token.",
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "email",
-                  "password"
-                ],
+                "required": ["email", "password"],
                 "properties": {
-                  "email": {
-                    "type": "string",
-                    "default": "admin@gmail.com"
-                  },
-                  "password": {
-                    "type": "string",
-                    "default": "admin"
-                  }
+                  "email": { "type": "string", "default": "admin@gmail.com" },
+                  "password": { "type": "string", "default": "admin" }
                 }
               }
             }
           }
         },
         "responses": {
-          "200": {
-            "description": "Login successful"
-          },
-          "401": {
-            "description": "Invalid email or password"
-          }
+          "200": { "description": "Login successful" },
+          "401": { "description": "Invalid email or password" }
         }
       }
     },
@@ -113,67 +141,159 @@
       "put": {
         "summary": "Update user details",
         "description": "Update a user’s name and email. Requires authentication.",
-        "tags": [
-          "Users"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "tags": ["Users"],
+        "security": [{ "bearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "name",
-                  "email"
-                ],
+                "required": ["name", "email"],
                 "properties": {
-                  "name": {
-                    "type": "string",
-                    "default": "admin"
-                  },
-                  "email": {
-                    "type": "string",
-                    "default": "admin@gmail.com"
-                  }
+                  "name": { "type": "string", "default": "admin" },
+                  "email": { "type": "string", "default": "admin@gmail.com" }
                 }
               }
             }
           }
         },
         "responses": {
-          "200": {
-            "description": "User updated successfully"
-          },
-          "401": {
-            "description": "Unauthorized (no token provided)"
-          },
-          "403": {
-            "description": "Invalid or expired token"
-          }
+          "200": { "description": "User updated successfully" },
+          "401": { "description": "Unauthorized (no token provided)" },
+          "403": { "description": "Invalid or expired token" }
         }
       }
     },
-
-    "/jobs/all/:id": {
-      "post": {
-        "summary": "get all job applications for the user",
-        "description": "get a list of job applications for the current user",
-        "tags": [
-          "Jobs"
+    "/jobs/all/{id}": {
+      "get": {
+        "summary": "Get all job applications for the user",
+        "description": "Get a list of job applications for the current user",
+        "tags": ["Jobs"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
         ],
-        "requestBody": {},
         "responses": {
           "200": {
-            "description": "list of job applications"
+            "description": "List of job applications",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/JobApplication" }
+                }
+              }
+            }
+          },
+          "400": { 
+            "description": "Invalid user ID",
+            "content": {
+              "application/json": { "$ref": "#/components/schemas/Error" }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" }
+        }
+      }
+    },
+    "/jobs": {
+      "post": {
+        "summary": "Create a new job application",
+        "description": "Create a new job application entry",
+        "tags": ["Jobs"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/JobApplication" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Job application created",
+            "content": {
+              "application/json": { "$ref": "#/components/schemas/JobApplication" }
+            }
           },
           "400": {
-            "description": "user id wrong"
+            "description": "Invalid input",
+            "content": {
+              "application/json": { "$ref": "#/components/schemas/Error" }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" }
+        }
+      }
+    },
+    "/jobs/{id}": {
+      "put": {
+        "summary": "Update a job application",
+        "description": "Update an existing job application",
+        "tags": ["Jobs"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
           }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/JobApplication" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Job application updated",
+            "content": {
+              "application/json": { "$ref": "#/components/schemas/JobApplication" }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": { "$ref": "#/components/schemas/Error" }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "404": { "description": "Job application not found" }
+        }
+      },
+      "delete": {
+        "summary": "Delete a job application",
+        "description": "Delete an existing job application",
+        "tags": ["Jobs"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Job application deleted successfully" },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "404": { "description": "Job application not found" }
         }
       }
     }

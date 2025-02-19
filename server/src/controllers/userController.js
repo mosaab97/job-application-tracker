@@ -4,11 +4,9 @@ const { generateToken, hashPassword, isPasswordValid } = require('../utils/authH
 
 const fetchUsers = async (req, res) => {
   try {
-    console.log("first")
     const users = await getAllUsers();
     res.status(200).json(users);
   } catch (error) {
-    console.log(error)
     res.status(500).json({ error: error.message });
   }
 };
@@ -21,7 +19,6 @@ const signup = async (req, res) => {
     if (existingUser) return res.status(400).json({ error: 'Email already in use' });
 
     const hashedPassword = await hashPassword(password);
-    console.log(hashedPassword, 'controller')
     const user = await createUser(name, email, hashedPassword);
 
     const token = generateToken(user);

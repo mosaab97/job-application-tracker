@@ -1,0 +1,1 @@
+DELETE FROM job_applications WHERE id = $1;

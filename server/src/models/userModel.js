@@ -1,9 +1,7 @@
 const { simpleExecute } = require("../config/database");
 
 const getAllUsers = async () => {
-  console.log(process.env.DB_NAME)
   const result = await simpleExecute('users/getUsers.sql');
-  console.log(result)
   return result.rows;
 };
 

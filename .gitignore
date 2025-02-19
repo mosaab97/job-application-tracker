@@ -18,10 +18,10 @@ build/
 *.sln
 *.sw?
 
-# Client specific (if needed)
+# Client
 client/.env
 client/coverage/
 
-# Server specific (if needed)
+# Server
 server/.env
 server/coverage/
