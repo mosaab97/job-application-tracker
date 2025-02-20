@@ -14,18 +14,30 @@ import {
   CircularProgress,
   Box,
   Tooltip,
-  Link
+  Link,
+  Button
 } from '@mui/material';
-import { Edit, Delete, Link as LinkIcon, Notes, Event, Work } from '@mui/icons-material';
+import { Edit, Delete, Link as LinkIcon, Notes, Event, Work, Add } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { useAuth } from '../context/AuthContext';
 import { useJobs } from '../context/JobsContext';
+import JobForm from '../components/dashboard/JobForm';
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const { jobsLoading, jobApplications, getAllApplications } = useJobs();
+  const { 
+    jobsLoading, 
+    jobApplications, 
+    getAllApplications,
+    createApplication,
+    updateApplication,
+    deleteApplication 
+  } = useJobs();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  const [formOpen, setFormOpen] = useState(false);
+  const [selectedJob, setSelectedJob] = useState(null);
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -61,15 +73,53 @@ const Dashboard = () => {
     return format(new Date(dateString), 'MMM dd, yyyy');
   };
 
-  const handleDelete = async (jobId) => {
-    // Implement delete functionality
+  const handleSubmit = async (data) => {
+    try {
+      const jobData = {
+        ...data,
+        user_id: user.id
+      };
+      
+      let result = null;
+      if (selectedJob) {
+        result = await updateApplication(selectedJob.id, jobData);
+      } else {
+        result = await createApplication(jobData);
+      }
+      if(result) {
+        await getAllApplications(user.id);
+        setFormOpen(false);
+      }
+    } catch (error) {
+      console.error('Operation failed:', error);
+    }
   };
 
-  const handleEdit = (jobId) => {
-    // Implement edit functionality
+  const handleCreate = () => {
+    setSelectedJob(null);
+    setFormOpen(true);
   };
 
-  if (loading || jobsLoading) {
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this application?')) {
+      try {
+        await deleteApplication(id);
+      } catch (error) {
+        console.error('Delete failed:', error);
+      }
+    }
+  };
+
+  const handleEdit = (job) => {
+    setSelectedJob({
+      ...job,
+      applied_date: job.applied_date?.split('T')[0] || '',
+      interview_date: job.interview_date?.split('T')[0] || ''
+    });
+    setFormOpen(true);
+  };
+
+  if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
         <CircularProgress size={60} />
@@ -107,6 +157,16 @@ const Dashboard = () => {
       }}>
         <Work fontSize="large" /> Job Applications
       </Typography>
+
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+        <Button
+          variant="contained" 
+          onClick={handleCreate}
+          startIcon={<Add />}
+        >
+          New Application
+        </Button>
+      </Box>
 
       <Box sx={{ flex: 1, overflow: 'hidden' }}>
         <TableContainer 
@@ -197,7 +257,7 @@ const Dashboard = () => {
                     </Tooltip>
                   </TableCell>
                   <TableCell>
-                    <IconButton onClick={() => handleEdit(app.id)}>
+                    <IconButton onClick={() => handleEdit(app)}>
                       <Edit color="primary" />
                     </IconButton>
                     <IconButton onClick={() => handleDelete(app.id)}>
@@ -223,6 +283,15 @@ const Dashboard = () => {
           No job applications found. Start adding some!
         </Typography>
       )}
+
+      <JobForm
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        onSubmit={handleSubmit}
+        initialData={selectedJob}
+        error={error}
+        loading={jobsLoading}
+      />
     </Container>
   );
 };

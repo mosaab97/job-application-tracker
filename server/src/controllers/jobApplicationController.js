@@ -37,6 +37,7 @@ const updateJob = async (req, res) => {
       }
       return res.status(400).json({ msg: "Invalid request" });
     } catch(e) {
+      console.log(e)
       return res.status(500).json({ msg: "Something went wrong" });
     }
   }

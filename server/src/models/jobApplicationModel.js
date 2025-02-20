@@ -11,22 +11,41 @@ const getJobApplicationById = async (id) => {
   }
   
   const updateJobApplication = async (id, updates) => {
-    const setClause = Object.keys(updates)
-      .map((key, index) => `${key} = $${index + 2}`)
-      .join(', ');
-    
-    const values = [id, ...Object.values(updates)];
-    
-    const query = `
-      UPDATE job_applications
-      SET ${setClause}, updated_at = NOW()
-      WHERE id = $1
-      RETURNING *
-    `;
-    
-    const result = await simpleExecute(query, values);
+    // Validate allowed fields
+    const allowedFields = [
+      'company_name',
+      'job_title',
+      'job_location',
+      'application_status',
+      'applied_date',
+      'interview_date',
+      'job_link',
+      'notes'
+    ];
+  
+    const validUpdates = Object.keys(updates)
+      .filter(key => allowedFields.includes(key))
+      .reduce((obj, key) => {
+        obj[key] = updates[key];
+        return obj;
+      }, {});
+  
+    // Prepare values in exact order matching SQL file parameters
+    const values = [
+      id,
+      validUpdates.company_name,
+      validUpdates.job_title,
+      validUpdates.job_location,
+      validUpdates.application_status,
+      validUpdates.applied_date,
+      validUpdates.interview_date,
+      validUpdates.job_link,
+      validUpdates.notes
+    ];
+  
+    const result = await simpleExecute('jobApplication/updateApplication.sql', values);
     return result.rows[0];
-  }
+  };
   
   const deleteJobApplication = async (id) => {
     await simpleExecute('jobApplication/deleteApplication.sql', [id]);
